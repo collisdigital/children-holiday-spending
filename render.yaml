@@ -20,11 +20,16 @@ services:
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
     envVars:
-      - key: VITE_API_URL
+      - key: BACKEND_HOST
         fromService:
           type: web
           name: holiday-tracker-backend
-          property: url
+          property: host
+      - key: BACKEND_PORT
+        fromService:
+          type: web
+          name: holiday-tracker-backend
+          property: port
 
 databases:
   - name: holiday-tracker-db
