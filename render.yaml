@@ -1,10 +1,11 @@
 services:
   - type: web
     name: holiday-tracker-backend
+    rootDir: backend
     plan: free
     env: python
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,23 +16,18 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
 
-  - type: web
+  - type: static
     name: holiday-tracker-frontend
-    plan: free
+    rootDir: frontend
     env: node
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     envVars:
-      - key: BACKEND_HOST
+      - key: VITE_API_URL
         fromService:
           type: web
           name: holiday-tracker-backend
-          property: host
-      - key: BACKEND_PORT
-        fromService:
-          type: web
-          name: holiday-tracker-backend
-          property: port
+          property: url
 
 databases:
   - name: holiday-tracker-db
