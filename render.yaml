@@ -3,7 +3,7 @@ services:
     name: holiday-tracker-backend
     rootDir: backend
     plan: free
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -19,7 +19,7 @@ services:
   - type: web
     name: holiday-tracker-frontend
     rootDir: frontend
-    env: static
+    runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
