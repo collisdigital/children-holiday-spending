@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
       }
     },
     preview: {
-      allowedHosts: true,
       proxy: {
         '/children': backendUrl,
         '/expenses': backendUrl,

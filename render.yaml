@@ -16,10 +16,10 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
 
-  - type: static
+  - type: web
     name: holiday-tracker-frontend
     rootDir: frontend
-    env: node
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
