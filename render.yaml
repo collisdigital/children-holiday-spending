@@ -22,16 +22,12 @@ services:
     runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /children/*
-        destination: https://holiday-tracker-backend.onrender.com/children/*
-      - type: rewrite
-        source: /expenses/*
-        destination: https://holiday-tracker-backend.onrender.com/expenses/*
-      - type: rewrite
-        source: /verify-pin
-        destination: https://holiday-tracker-backend.onrender.com/verify-pin
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: holiday-tracker-backend
+          property: host
 
 databases:
   - name: holiday-tracker-db

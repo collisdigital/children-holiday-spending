@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Use relative URL to leverage Render Rewrites (or Vite proxy in dev)
-const API_URL = '';
+let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// Render injects the hostname without protocol via 'host' property
+if (API_URL && !API_URL.startsWith('http')) {
+  API_URL = `https://${API_URL}`;
+}
 
 export const api = axios.create({
   baseURL: API_URL,
