@@ -23,11 +23,13 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
-      - key: VITE_API_URL
+      - key: BACKEND_HOST
         fromService:
           type: web
           name: holiday-tracker-backend
           property: host
+      - key: VITE_API_URL
+        value: https://${BACKEND_HOST}.onrender.com
 
 databases:
   - name: holiday-tracker-db
