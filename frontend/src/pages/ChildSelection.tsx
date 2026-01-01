@@ -1,22 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Child } from '../api/client';
 import { Link } from 'react-router-dom';
+import DebugConsole from '../components/DebugConsole';
 
 const ChildSelection: React.FC = () => {
-  const { data: children, isLoading, error } = useQuery<Child[]>({
+  const [logs, setLogs] = useState<string[]>([]);
+
+  const addLog = (msg: string) => {
+      setLogs(prev => [...prev, `${new Date().toISOString().split('T')[1]} - ${msg}`]);
+  };
+
+  const { data: children, isLoading, error, isError } = useQuery<Child[]>({
     queryKey: ['children'],
     queryFn: async () => {
-      const response = await api.get('/children');
-      return response.data;
+      addLog('Fetching children...');
+      try {
+          const response = await api.get('/children');
+          addLog(`Success: Got ${response.data?.length} children`);
+          return response.data;
+      } catch (err: any) {
+          addLog(`Error fetching: ${err.message}`);
+          if (err.response) {
+              addLog(`Status: ${err.response.status}`);
+              addLog(`Data: ${JSON.stringify(err.response.data)}`);
+          }
+          throw err;
+      }
     },
   });
 
-  if (isLoading) return <div className="text-center mt-10">Loading...</div>;
-  if (error) return <div className="text-center mt-10 text-red-500">Error loading children</div>;
+  // Capture generic loading/error states for display
+  useEffect(() => {
+      if (isLoading) addLog('Status: Loading...');
+      if (isError) addLog('Status: Error');
+  }, [isLoading, isError]);
+
+  const envInfo = {
+      VITE_API_URL: import.meta.env.VITE_API_URL || 'undefined',
+      BASE_URL: api.defaults.baseURL || 'undefined'
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <DebugConsole logs={logs} envInfo={envInfo} />
+
+      {isLoading && <div className="text-center mt-10">Loading...</div>}
+      {error && <div className="text-center mt-10 text-red-500">Error loading children</div>}
+
+      {!isLoading && !error && (
+        <>
       <h1 className="text-3xl font-bold mb-8 text-primary">Holiday Spending Tracker</h1>
       <p className="mb-6 text-gray-600">Select your name to view spending:</p>
 
@@ -37,6 +70,8 @@ const ChildSelection: React.FC = () => {
           Parent Login
         </Link>
       </div>
+      </>
+      )}
     </div>
   );
 };
