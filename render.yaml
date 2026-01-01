@@ -24,7 +24,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://${holiday-tracker-backend}.onrender.com
+        value: https://holiday-tracker-backend-xv3e.onrender.com
 
 databases:
   - name: holiday-tracker-db
