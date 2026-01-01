@@ -1,6 +1,7 @@
 services:
   - type: web
     name: holiday-tracker-backend
+    plan: free
     env: python
     buildCommand: cd backend && pip install uv && uv pip install -r requirements.txt
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -16,6 +17,7 @@ services:
 
   - type: web
     name: holiday-tracker-frontend
+    plan: free
     env: node
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm run preview -- --host 0.0.0.0 --port $PORT
