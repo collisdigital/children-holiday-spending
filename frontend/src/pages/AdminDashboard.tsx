@@ -3,10 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, type Child } from '../api/client';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import DebugConsole from '../components/DebugConsole';
+import { useDebugConsole } from '../hooks/useDebugConsole';
 
 const AdminDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { logs, addLog } = useDebugConsole();
 
   // State for form
   const [amount, setAmount] = useState('');
@@ -18,20 +21,34 @@ const AdminDashboard: React.FC = () => {
   // Fetch Children
   const { data: children } = useQuery<Child[]>({
     queryKey: ['children'],
-    queryFn: async () => (await api.get('/children')).data,
+    queryFn: async () => {
+      addLog('Fetching children...');
+      try {
+        const response = await api.get('/children');
+        addLog(`Children loaded: ${response.data?.length}`);
+        return response.data;
+      } catch (err: any) {
+        addLog(`Error loading children: ${err.message}`);
+        throw err;
+      }
+    },
   });
-
-  // Fetch Recent Expenses (Global recent or just list per child? Let's just allow adding for now)
-  // To show recent expenses, we might need an endpoint "GET /expenses" (global) which I didn't create.
-  // I only created GET /children/{id}/expenses.
-  // I'll skip the global list for now or fetch for each child if needed.
-  // Requirement: "parent to add and edit what is being spent by which child"
-  // Let's just focus on Adding. Editing would be triggered from a list.
-  // I will show a list of children with their totals, and clicking one expands to show their expenses with Edit buttons.
 
   const addExpenseMutation = useMutation({
     mutationFn: async (newExpense: any) => {
-      return await api.post('/expenses', newExpense);
+      addLog(`Adding expense: ${JSON.stringify(newExpense)}`);
+      try {
+        const res = await api.post('/expenses', newExpense);
+        addLog('Expense added successfully');
+        return res;
+      } catch (err: any) {
+        addLog(`Failed to add expense: ${err.message}`);
+        if (err.response) {
+          addLog(`Status: ${err.response.status}`);
+          addLog(`Response: ${JSON.stringify(err.response.data)}`);
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       setSuccessMsg('Expense added successfully!');
@@ -70,8 +87,14 @@ const AdminDashboard: React.FC = () => {
       window.location.reload(); // Hard reset to clear memory
   };
 
+  const envInfo = {
+      VITE_API_URL: import.meta.env.VITE_API_URL || 'undefined',
+      'X-Admin-PIN': api.defaults.headers.common['X-Admin-PIN'] ? '***SET***' : 'MISSING'
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
+      <DebugConsole logs={logs} envInfo={envInfo} />
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-primary">Parent Dashboard</h1>

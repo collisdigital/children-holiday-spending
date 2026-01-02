@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Child } from '../api/client';
 import { Link } from 'react-router-dom';
 import DebugConsole from '../components/DebugConsole';
+import { useDebugConsole } from '../hooks/useDebugConsole';
 
 const ChildSelection: React.FC = () => {
-  const [logs, setLogs] = useState<string[]>([]);
-
-  const addLog = (msg: string) => {
-      setLogs(prev => [...prev, `${new Date().toISOString().split('T')[1]} - ${msg}`]);
-  };
+  const { logs, addLog } = useDebugConsole();
 
   const { data: children, isLoading, error, isError } = useQuery<Child[]>({
     queryKey: ['children'],
