@@ -3,6 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func
 from models import Child, Expense
 import schemas
+from datetime import datetime, timezone
 
 async def get_child_by_name(db: AsyncSession, name: str):
     result = await db.execute(select(Child).filter(Child.name == name))
@@ -33,6 +34,10 @@ async def get_child_total_expense(db: AsyncSession, child_id: int):
     return total if total else 0.0
 
 async def create_expense(db: AsyncSession, expense: schemas.ExpenseCreate):
+    # Ensure date is naive UTC for PostgreSQL TIMESTAMP WITHOUT TIME ZONE
+    if expense.date.tzinfo is not None:
+        expense.date = expense.date.astimezone(timezone.utc).replace(tzinfo=None)
+
     db_expense = Expense(**expense.model_dump())
     db.add(db_expense)
     await db.commit()
@@ -46,6 +51,10 @@ async def update_expense(db: AsyncSession, expense_id: int, expense_update: sche
         return None
 
     update_data = expense_update.model_dump(exclude_unset=True)
+    if 'date' in update_data and update_data['date'] is not None:
+        if update_data['date'].tzinfo is not None:
+            update_data['date'] = update_data['date'].astimezone(timezone.utc).replace(tzinfo=None)
+
     for key, value in update_data.items():
         setattr(db_expense, key, value)
 
