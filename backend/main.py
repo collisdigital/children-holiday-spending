@@ -15,9 +15,8 @@ CHILDREN_NAMES = ["Xav", "Emma", "Frankie", "Zoe"]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Seed database
-    # We need to make sure tables exist first.
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
+    # Note: Tables are created by Alembic via start command, so we don't run create_all here
+    # to avoid conflicts.
 
     async with AsyncSession(engine) as session:
         for name in CHILDREN_NAMES:
