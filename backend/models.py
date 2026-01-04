@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from database import Base
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
+from database import Base
+
 
 class Child(Base):
     __tablename__ = "children"
@@ -17,6 +20,7 @@ class Expense(Base):
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Float, nullable=False)
     description = Column(String, nullable=False)
+    category = Column(String, default="cash", nullable=False, server_default="cash")
     date = Column(DateTime, default=datetime.utcnow)
     child_id = Column(Integer, ForeignKey("children.id"))
 

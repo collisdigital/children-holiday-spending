@@ -23,6 +23,7 @@ export interface Expense {
   id: number;
   amount: number;
   description: string;
+  category: 'cash' | 'card';
   date: string;
   child_id: number;
 }
@@ -30,4 +31,6 @@ export interface Expense {
 export interface ChildWithTotal {
   child_id: number;
   total_amount: number;
+  total_cash: number;
+  total_card: number;
 }

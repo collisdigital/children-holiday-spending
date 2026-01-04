@@ -1,14 +1,14 @@
-from fastapi import FastAPI, Depends, HTTPException, Header, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 from contextlib import asynccontextmanager
+from typing import List
+
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import crud
-import models
 import schemas
-from database import get_db, engine
 from config import settings
+from database import engine, get_db
 
 CHILDREN_NAMES = ["Xav", "Emma", "Frankie", "Zoe"]
 
@@ -57,13 +57,14 @@ async def read_child_expenses(child_id: int, db: AsyncSession = Depends(get_db))
     expenses = await crud.get_expenses_by_child(db, child_id)
     return expenses
 
-@app.get("/children/{child_id}/total")
+@app.get("/children/{child_id}/total", response_model=schemas.ChildSpendSummary)
 async def read_child_total(child_id: int, db: AsyncSession = Depends(get_db)):
     child = await crud.get_child(db, child_id)
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
-    total = await crud.get_child_total_expense(db, child_id)
-    return {"child_id": child_id, "total_amount": total}
+    # crud returns a dict matching the schema
+    summary = await crud.get_child_total_expense(db, child_id)
+    return summary
 
 @app.post("/expenses", response_model=schemas.Expense, dependencies=[Depends(verify_admin_pin)])
 async def create_expense(expense: schemas.ExpenseCreate, db: AsyncSession = Depends(get_db)):

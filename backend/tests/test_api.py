@@ -1,15 +1,16 @@
-import pytest
-import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from main import app
-from database import get_db, Base
-from contextlib import asynccontextmanager
-
 # Use file-based SQLite for testing to avoid memory/loop issues
 import os
+from contextlib import asynccontextmanager
+
+import pytest
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from database import Base, get_db
+from main import app
+
 TEST_DB_FILE = "./test.db"
 TEST_DATABASE_URL = f"sqlite+aiosqlite:///{TEST_DB_FILE}"
 
