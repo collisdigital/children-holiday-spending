@@ -30,6 +30,10 @@ jobs:
       run: |
         ruff check .
 
+    - name: Run Tests
+      run: |
+        pytest
+
   frontend-test:
     runs-on: ubuntu-latest
     defaults:
