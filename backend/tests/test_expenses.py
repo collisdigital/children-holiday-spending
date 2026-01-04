@@ -82,7 +82,13 @@ async def test_create_expense_categories(client, db_session):
     # 2. Create Card
     resp = await client.post(
         "/expenses",
-        json={"amount": 20.0, "description": "Toy", "date": "2023-10-01T12:00:00", "child_id": child.id, "category": "card"},
+        json={
+            "amount": 20.0,
+            "description": "Toy",
+            "date": "2023-10-01T12:00:00",
+            "child_id": child.id,
+            "category": "card"
+        },
         headers={"X-Admin-PIN": "1122"}
     )
     assert resp.status_code == 200, resp.text
@@ -92,7 +98,13 @@ async def test_create_expense_categories(client, db_session):
     # 3. Create Cash Explicitly
     resp = await client.post(
         "/expenses",
-        json={"amount": 5.0, "description": "Gum", "date": "2023-10-01T12:00:00", "child_id": child.id, "category": "cash"},
+        json={
+            "amount": 5.0,
+            "description": "Gum",
+            "date": "2023-10-01T12:00:00",
+            "child_id": child.id,
+            "category": "cash"
+        },
         headers={"X-Admin-PIN": "1122"}
     )
     assert resp.status_code == 200, resp.text
@@ -108,10 +120,40 @@ async def test_get_totals_breakdown(client, db_session):
 
     # Add expenses
     # Cash: 10 + 5 = 15
-    await client.post("/expenses", json={"amount": 10.0, "description": "C1", "date": "2023-01-01T10:00:00", "child_id": child.id, "category": "cash"}, headers={"X-Admin-PIN": "1122"})
-    await client.post("/expenses", json={"amount": 5.0, "description": "C2", "date": "2023-01-01T10:00:00", "child_id": child.id, "category": "cash"}, headers={"X-Admin-PIN": "1122"})
+    await client.post(
+        "/expenses",
+        json={
+            "amount": 10.0,
+            "description": "C1",
+            "date": "2023-01-01T10:00:00",
+            "child_id": child.id,
+            "category": "cash"
+        },
+        headers={"X-Admin-PIN": "1122"}
+    )
+    await client.post(
+        "/expenses",
+        json={
+            "amount": 5.0,
+            "description": "C2",
+            "date": "2023-01-01T10:00:00",
+            "child_id": child.id,
+            "category": "cash"
+        },
+        headers={"X-Admin-PIN": "1122"}
+    )
     # Card: 20 = 20
-    await client.post("/expenses", json={"amount": 20.0, "description": "CD1", "date": "2023-01-01T10:00:00", "child_id": child.id, "category": "card"}, headers={"X-Admin-PIN": "1122"})
+    await client.post(
+        "/expenses",
+        json={
+            "amount": 20.0,
+            "description": "CD1",
+            "date": "2023-01-01T10:00:00",
+            "child_id": child.id,
+            "category": "card"
+        },
+        headers={"X-Admin-PIN": "1122"}
+    )
 
     # Get Totals
     resp = await client.get(f"/children/{child.id}/total")
