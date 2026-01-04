@@ -1,13 +1,15 @@
+from contextlib import asynccontextmanager
+
 import pytest_asyncio
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
 
 from database import Base, get_db
 from main import app
+
 
 @pytest_asyncio.fixture(scope="function")
 async def db_engine():
