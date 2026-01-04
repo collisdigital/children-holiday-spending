@@ -20,7 +20,13 @@ engine_test = create_async_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test, class_=AsyncSession)
+TestingSessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine_test,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 # Mock lifespan to prevent main DB connection
 @asynccontextmanager
