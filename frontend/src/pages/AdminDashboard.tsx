@@ -14,6 +14,7 @@ const AdminDashboard: React.FC = () => {
   // State for form
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<'cash' | 'card'>('cash');
   const [selectedChild, setSelectedChild] = useState<number | ''>('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -77,6 +78,7 @@ const AdminDashboard: React.FC = () => {
       child_id: Number(selectedChild),
       amount: parseFloat(amount),
       description,
+      category,
       date: new Date().toISOString(), // Auto-filled with "now"
     });
   };
@@ -133,7 +135,7 @@ const AdminDashboard: React.FC = () => {
               />
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-1">
               <label className="block text-gray-700 mb-2">Description</label>
               <input
                 type="text"
@@ -142,6 +144,32 @@ const AdminDashboard: React.FC = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g. Ice Cream"
               />
+            </div>
+
+            <div className="md:col-span-1">
+              <label className="block text-gray-700 mb-2">Category</label>
+              <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                          type="radio"
+                          value="cash"
+                          checked={category === 'cash'}
+                          onChange={() => setCategory('cash')}
+                          className="w-4 h-4 text-primary"
+                      />
+                      <span>Cash</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                          type="radio"
+                          value="card"
+                          checked={category === 'card'}
+                          onChange={() => setCategory('card')}
+                          className="w-4 h-4 text-primary"
+                      />
+                      <span>Card</span>
+                  </label>
+              </div>
             </div>
 
             <div className="md:col-span-2">

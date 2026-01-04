@@ -26,6 +26,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Run Linting
+      run: |
+        ruff check .
+
     - name: Run Tests
       env:
         DATABASE_URL: sqlite+aiosqlite:///./test.db

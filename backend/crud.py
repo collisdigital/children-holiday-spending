@@ -1,9 +1,12 @@
+from datetime import timezone
+
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
-from models import Child, Expense
+
 import schemas
-from datetime import datetime, timezone
+from models import Child, Expense
+
 
 async def get_child_by_name(db: AsyncSession, name: str):
     result = await db.execute(select(Child).filter(Child.name == name))
@@ -29,9 +32,31 @@ async def get_expenses_by_child(db: AsyncSession, child_id: int):
     return result.scalars().all()
 
 async def get_child_total_expense(db: AsyncSession, child_id: int):
-    result = await db.execute(select(func.sum(Expense.amount)).filter(Expense.child_id == child_id))
-    total = result.scalar()
-    return total if total else 0.0
+    # Total
+    total_query = select(func.sum(Expense.amount)).filter(Expense.child_id == child_id)
+    total_res = await db.execute(total_query)
+    total = total_res.scalar() or 0.0
+
+    # Cash
+    cash_query = select(func.sum(Expense.amount)).filter(
+        Expense.child_id == child_id, Expense.category == "cash"
+    )
+    cash_res = await db.execute(cash_query)
+    cash = cash_res.scalar() or 0.0
+
+    # Card
+    card_query = select(func.sum(Expense.amount)).filter(
+        Expense.child_id == child_id, Expense.category == "card"
+    )
+    card_res = await db.execute(card_query)
+    card = card_res.scalar() or 0.0
+
+    return {
+        "child_id": child_id,
+        "total_amount": total,
+        "total_cash": cash,
+        "total_card": card,
+    }
 
 async def create_expense(db: AsyncSession, expense: schemas.ExpenseCreate):
     # Ensure date is naive UTC for PostgreSQL TIMESTAMP WITHOUT TIME ZONE
