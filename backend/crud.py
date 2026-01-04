@@ -69,6 +69,14 @@ async def create_expense(db: AsyncSession, expense: schemas.ExpenseCreate):
     await db.refresh(db_expense)
     return db_expense
 
+async def delete_expense(db: AsyncSession, expense_id: int):
+    result = await db.execute(select(Expense).filter(Expense.id == expense_id))
+    db_expense = result.scalars().first()
+    if db_expense:
+        await db.delete(db_expense)
+        await db.commit()
+    return db_expense
+
 async def update_expense(db: AsyncSession, expense_id: int, expense_update: schemas.ExpenseUpdate):
     result = await db.execute(select(Expense).filter(Expense.id == expense_id))
     db_expense = result.scalars().first()
