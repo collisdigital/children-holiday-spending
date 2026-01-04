@@ -187,7 +187,7 @@ const AdminDashboard: React.FC = () => {
         {/* View/Edit Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {children?.map(child => (
-                <ChildExpenseSummary key={child.id} child={child} />
+                <ChildExpenseSummary key={child.id} child={child} onSuccess={(msg) => setSuccessMsg(msg)} />
             ))}
         </div>
       </div>
@@ -195,7 +195,7 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-const ChildExpenseSummary: React.FC<{ child: Child }> = ({ child }) => {
+const ChildExpenseSummary: React.FC<{ child: Child; onSuccess: (msg: string) => void }> = ({ child, onSuccess }) => {
     // We fetch expenses for each child to allow editing
     // This isn't efficient for many children, but for 4 it's fine.
     const { data: expenses } = useQuery({
@@ -212,7 +212,7 @@ const ChildExpenseSummary: React.FC<{ child: Child }> = ({ child }) => {
                 {expenses?.map((ex: any) => (
                     <li key={ex.id} className="text-sm border-b pb-2">
                         {editingId === ex.id ? (
-                            <EditForm expense={ex} onCancel={() => setEditingId(null)} onSuccess={() => setEditingId(null)} />
+                            <EditForm expense={ex} onCancel={() => setEditingId(null)} onSuccess={onSuccess} onFinish={() => setEditingId(null)} />
                         ) : (
                             <div onClick={() => setEditingId(ex.id)} className="cursor-pointer hover:bg-gray-50 p-1 rounded group">
                                 <div className="flex justify-between font-medium">
@@ -232,7 +232,7 @@ const ChildExpenseSummary: React.FC<{ child: Child }> = ({ child }) => {
     );
 };
 
-const EditForm: React.FC<{ expense: any, onCancel: () => void, onSuccess: () => void }> = ({ expense, onCancel, onSuccess }) => {
+const EditForm: React.FC<{ expense: any, onCancel: () => void, onSuccess: (msg: string) => void, onFinish: () => void }> = ({ expense, onCancel, onSuccess, onFinish }) => {
     const [amount, setAmount] = useState(expense.amount);
     const [description, setDescription] = useState(expense.description);
     const queryClient = useQueryClient();
@@ -244,9 +244,27 @@ const EditForm: React.FC<{ expense: any, onCancel: () => void, onSuccess: () => 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['expenses'] });
             queryClient.invalidateQueries({ queryKey: ['total'] });
-            onSuccess();
+            onFinish();
         }
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            return await api.delete(`/expenses/${expense.id}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['expenses'] });
+            queryClient.invalidateQueries({ queryKey: ['total'] });
+            onSuccess('Expense deleted successfully!');
+            onFinish();
+        }
+    });
+
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this expense?')) {
+            deleteMutation.mutate();
+        }
+    };
 
     return (
         <div className="bg-gray-50 p-2 rounded">
@@ -261,14 +279,23 @@ const EditForm: React.FC<{ expense: any, onCancel: () => void, onSuccess: () => 
                 value={amount}
                 onChange={e => setAmount(Number(e.target.value))}
             />
-            <div className="flex gap-2 justify-end">
-                <button onClick={onCancel} className="text-gray-500 text-xs">Cancel</button>
+            <div className="flex gap-2 justify-between mt-2">
                 <button
-                    onClick={() => updateMutation.mutate({ amount, description })}
-                    className="text-blue-600 text-xs font-bold"
+                    onClick={handleDelete}
+                    className="text-red-500 text-xs hover:text-red-700"
+                    type="button"
                 >
-                    Save
+                    Delete
                 </button>
+                <div className="flex gap-2">
+                    <button onClick={onCancel} className="text-gray-500 text-xs">Cancel</button>
+                    <button
+                        onClick={() => updateMutation.mutate({ amount, description })}
+                        className="text-blue-600 text-xs font-bold"
+                    >
+                        Save
+                    </button>
+                </div>
             </div>
         </div>
     )

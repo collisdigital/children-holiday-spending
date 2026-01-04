@@ -80,6 +80,13 @@ async def update_expense(expense_id: int, expense: schemas.ExpenseUpdate, db: As
         raise HTTPException(status_code=404, detail="Expense not found")
     return db_expense
 
+@app.delete("/expenses/{expense_id}", dependencies=[Depends(verify_admin_pin)])
+async def delete_expense(expense_id: int, db: AsyncSession = Depends(get_db)):
+    success = await crud.delete_expense(db, expense_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return {"status": "success", "id": expense_id}
+
 @app.post("/verify-pin")
 async def check_pin(x_admin_pin: str = Header(None)):
     verify_admin_pin(x_admin_pin)

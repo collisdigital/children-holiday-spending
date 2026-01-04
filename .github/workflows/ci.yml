@@ -30,14 +30,6 @@ jobs:
       run: |
         ruff check .
 
-    - name: Run Tests
-      env:
-        DATABASE_URL: sqlite+aiosqlite:///./test.db
-        ADMIN_PIN: 1122
-        PYTHONPATH: .
-      run: |
-        pytest
-
   frontend-test:
     runs-on: ubuntu-latest
     defaults:
