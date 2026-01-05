@@ -1,47 +1,24 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Child } from '../api/client';
 import { Link } from 'react-router-dom';
-import DebugConsole from '../components/DebugConsole';
-import { useDebugConsole } from '../hooks/useDebugConsole';
 
 const ChildSelection: React.FC = () => {
-  const { logs, addLog } = useDebugConsole();
-
-  const { data: children, isLoading, error, isError } = useQuery<Child[]>({
+  const { data: children, isLoading, error } = useQuery<Child[]>({
     queryKey: ['children'],
     queryFn: async () => {
-      addLog('Fetching children...');
       try {
           const response = await api.get('/children');
-          addLog(`Success: Got ${response.data?.length} children`);
           return response.data;
       } catch (err: any) {
-          addLog(`Error fetching: ${err.message}`);
-          if (err.response) {
-              addLog(`Status: ${err.response.status}`);
-              addLog(`Data: ${JSON.stringify(err.response.data)}`);
-          }
+          console.error(`Error fetching: ${err.message}`);
           throw err;
       }
     },
   });
 
-  // Capture generic loading/error states for display
-  useEffect(() => {
-      if (isLoading) addLog('Status: Loading...');
-      if (isError) addLog('Status: Error');
-  }, [isLoading, isError]);
-
-  const envInfo = {
-      VITE_API_URL: import.meta.env.VITE_API_URL || 'undefined',
-      BASE_URL: api.defaults.baseURL || 'undefined'
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <DebugConsole logs={logs} envInfo={envInfo} />
-
       <h1 className="text-3xl font-bold mb-8 text-primary">Holiday Spending Tracker</h1>
 
       {isLoading && (
