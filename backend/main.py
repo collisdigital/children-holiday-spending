@@ -15,8 +15,12 @@ CHILDREN_NAMES = ["Xav", "Emma", "Frankie", "Zoe"]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Seed database
-    # Note: Tables are created by Alembic via start command, so we don't run create_all here
-    # to avoid conflicts.
+    # In development/sandbox without migration run, we might need to create tables.
+    # However, standard practice is to rely on alembic or pre-start script.
+    # For sandbox verification where we run uvicorn directly, we ensure tables exist.
+    from database import Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSession(engine) as session:
         for name in CHILDREN_NAMES:
