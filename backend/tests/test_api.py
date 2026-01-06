@@ -67,7 +67,13 @@ async def test_full_flow(client, db_session):
     # 2. Create Expense
     response = await client.post(
         "/expenses",
-        json={"amount": 50.0, "description": "Gift", "date": "2023-10-27T10:00:00", "child_id": child.id},
+        json={
+            "amount": 50.0,
+            "description": "Gift",
+            "date": "2023-10-27T10:00:00",
+            "child_id": child.id,
+            "currency": "GBP"
+        },
         headers={"X-Admin-PIN": "1122"}
     )
     assert response.status_code == 200
@@ -78,6 +84,7 @@ async def test_full_flow(client, db_session):
     data = response.json()
     assert len(data) == 1
     assert data[0]["amount"] == 50.0
+    assert data[0]["currency"] == "GBP"
 
     # 4. Auth Check
     response = await client.post(

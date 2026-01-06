@@ -21,6 +21,7 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     description = Column(String, nullable=False)
     category = Column(String, default="cash", nullable=False, server_default="cash")
+    currency = Column(String, default="EUR", nullable=False, server_default="EUR")
     date = Column(DateTime, default=datetime.utcnow)
     child_id = Column(Integer, ForeignKey("children.id"))
 

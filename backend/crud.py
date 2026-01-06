@@ -1,10 +1,10 @@
 from datetime import timezone
 
-from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 import schemas
+from currencies import DEFAULT_CURRENCY, RATES_TO_GBP, SUPPORTED_CURRENCIES
 from models import Child, Expense
 
 
@@ -32,30 +32,40 @@ async def get_expenses_by_child(db: AsyncSession, child_id: int):
     return result.scalars().all()
 
 async def get_child_total_expense(db: AsyncSession, child_id: int):
-    # Total
-    total_query = select(func.sum(Expense.amount)).filter(Expense.child_id == child_id)
-    total_res = await db.execute(total_query)
-    total = total_res.scalar() or 0.0
+    # Fetch all expenses for the child
+    expenses = await get_expenses_by_child(db, child_id)
 
-    # Cash
-    cash_query = select(func.sum(Expense.amount)).filter(
-        Expense.child_id == child_id, Expense.category == "cash"
-    )
-    cash_res = await db.execute(cash_query)
-    cash = cash_res.scalar() or 0.0
+    currency_totals = {}
 
-    # Card
-    card_query = select(func.sum(Expense.amount)).filter(
-        Expense.child_id == child_id, Expense.category == "card"
-    )
-    card_res = await db.execute(card_query)
-    card = card_res.scalar() or 0.0
+    # Initialize supported currencies
+    for curr in SUPPORTED_CURRENCIES:
+        currency_totals[curr] = {"total": 0.0, "cash": 0.0, "card": 0.0}
+
+    grand_total_gbp = 0.0
+
+    for expense in expenses:
+        curr = expense.currency or DEFAULT_CURRENCY
+        if curr not in currency_totals:
+            # Handle unexpected currencies if any, though schema/model default enforces supported ones mostly
+            currency_totals[curr] = {"total": 0.0, "cash": 0.0, "card": 0.0}
+
+        amount = expense.amount
+        category = expense.category or "cash"
+
+        currency_totals[curr]["total"] += amount
+        if category == "cash":
+            currency_totals[curr]["cash"] += amount
+        elif category == "card":
+            currency_totals[curr]["card"] += amount
+
+        # Convert to GBP
+        rate = RATES_TO_GBP.get(curr, 0.0)
+        grand_total_gbp += amount * rate
 
     return {
         "child_id": child_id,
-        "total_amount": total,
-        "total_cash": cash,
-        "total_card": card,
+        "grand_total_gbp": grand_total_gbp,
+        "currency_totals": currency_totals,
     }
 
 async def create_expense(db: AsyncSession, expense: schemas.ExpenseCreate):

@@ -24,13 +24,23 @@ export interface Expense {
   amount: number;
   description: string;
   category: 'cash' | 'card';
+  currency: 'GBP' | 'EUR' | 'MAD';
   date: string;
   child_id: number;
 }
 
+export interface CurrencyTotal {
+  total: number;
+  cash: number;
+  card: number;
+}
+
 export interface ChildWithTotal {
   child_id: number;
-  total_amount: number;
-  total_cash: number;
-  total_card: number;
+  grand_total_gbp: number;
+  currency_totals: {
+    GBP: CurrencyTotal;
+    EUR: CurrencyTotal;
+    MAD: CurrencyTotal;
+  };
 }

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -21,6 +21,7 @@ class ExpenseBase(BaseModel):
     amount: float
     description: str
     category: str = "cash"
+    currency: str = "EUR"
     date: datetime
     child_id: int
 
@@ -31,6 +32,7 @@ class ExpenseUpdate(BaseModel):
     amount: Optional[float] = None
     description: Optional[str] = None
     category: Optional[str] = None
+    currency: Optional[str] = None
     date: Optional[datetime] = None
     child_id: Optional[int] = None
 
@@ -43,8 +45,12 @@ class Expense(ExpenseBase):
 class ChildWithTotal(Child):
     total_expenses: float
 
+class CurrencyTotal(BaseModel):
+    total: float
+    cash: float
+    card: float
+
 class ChildSpendSummary(BaseModel):
     child_id: int
-    total_amount: float
-    total_cash: float
-    total_card: float
+    grand_total_gbp: float
+    currency_totals: Dict[str, CurrencyTotal]
