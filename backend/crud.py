@@ -1,12 +1,11 @@
 from datetime import timezone
 
-from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 import schemas
+from currencies import DEFAULT_CURRENCY, RATES_TO_GBP, SUPPORTED_CURRENCIES
 from models import Child, Expense
-from currencies import RATES_TO_GBP, SUPPORTED_CURRENCIES, DEFAULT_CURRENCY
 
 
 async def get_child_by_name(db: AsyncSession, name: str):

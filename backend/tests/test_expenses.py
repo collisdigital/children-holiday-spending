@@ -69,7 +69,8 @@ async def test_get_totals_breakdown(client, db_session):
             "description": "C1",
             "date": "2023-01-01T10:00:00",
             "child_id": child.id,
-            "category": "cash"
+            "category": "cash",
+            "currency": "EUR"  # Explicitly set currency to ensure deterministic result
         },
         headers={"X-Admin-PIN": "1122"}
     )
@@ -80,7 +81,8 @@ async def test_get_totals_breakdown(client, db_session):
             "description": "C2",
             "date": "2023-01-01T10:00:00",
             "child_id": child.id,
-            "category": "cash"
+            "category": "cash",
+            "currency": "EUR"
         },
         headers={"X-Admin-PIN": "1122"}
     )
@@ -92,7 +94,8 @@ async def test_get_totals_breakdown(client, db_session):
             "description": "CD1",
             "date": "2023-01-01T10:00:00",
             "child_id": child.id,
-            "category": "card"
+            "category": "card",
+            "currency": "EUR"
         },
         headers={"X-Admin-PIN": "1122"}
     )
@@ -103,6 +106,10 @@ async def test_get_totals_breakdown(client, db_session):
     data = resp.json()
 
     assert data["child_id"] == child.id
-    assert data["total_amount"] == 35.0
-    assert data["total_cash"] == 15.0
-    assert data["total_card"] == 20.0
+
+    # Updated assertions for new structure
+    # With EUR as currency, the breakdown should be under "EUR"
+    eur_stats = data["currency_totals"]["EUR"]
+    assert eur_stats["total"] == 35.0
+    assert eur_stats["cash"] == 15.0
+    assert eur_stats["card"] == 20.0
