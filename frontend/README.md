@@ -15,9 +15,10 @@ This is the React frontend for the Children Holiday Spending application. It is 
     ```
 
 2.  **Environment Variables:**
-    The application connects to a backend API. You can configure the backend location using environment variables (defaults to `localhost:8000`):
-    - `BACKEND_HOST`: The hostname of the backend API.
-    - `BACKEND_PORT`: The port of the backend API.
+    The application connects to a backend API. You can configure the backend location using environment variables:
+    - `BACKEND_HOST`: The hostname of the backend API (used by Vite proxy). Defaults to `localhost`.
+    - `BACKEND_PORT`: The port of the backend API (used by Vite proxy). Defaults to `8000`.
+    - `VITE_API_URL`: If set, overrides the proxy and uses this absolute URL for all API requests (e.g., `https://api.myapp.com`). If unset, the app uses relative paths, which are proxied via the Vite development server.
 
 3.  **Run in Development mode:**
     ```bash
