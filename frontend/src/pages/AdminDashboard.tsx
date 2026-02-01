@@ -22,7 +22,7 @@ const AdminDashboard: React.FC = () => {
     queryFn: async () => {
       try {
         const response = await api.get('/children');
-        return response.data;
+        return Array.isArray(response.data) ? response.data : [];
       } catch (err: any) {
         console.error(`Error loading children: ${err.message}`);
         throw err;
@@ -183,7 +183,10 @@ const ChildExpenseSummary: React.FC<{ child: Child; onSuccess: (msg: string) => 
     // This isn't efficient for many children, but for 4 it's fine.
     const { data: expenses } = useQuery({
         queryKey: ['expenses', child.id.toString()],
-        queryFn: async () => (await api.get(`/children/${child.id}/expenses`)).data
+        queryFn: async () => {
+             const response = await api.get(`/children/${child.id}/expenses`);
+             return Array.isArray(response.data) ? response.data : [];
+        }
     });
 
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -192,7 +195,7 @@ const ChildExpenseSummary: React.FC<{ child: Child; onSuccess: (msg: string) => 
         <div className="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto">
             <h3 className="font-bold text-lg mb-2 text-primary sticky top-0 bg-white pb-2 border-b">{child.name}</h3>
             <ul className="space-y-3">
-                {expenses?.map((ex: any) => (
+                {Array.isArray(expenses) && expenses.map((ex: any) => (
                     <li key={ex.id} className="text-sm border-b pb-2">
                         {editingId === ex.id ? (
                             <EditForm expense={ex} onCancel={() => setEditingId(null)} onSuccess={onSuccess} onFinish={() => setEditingId(null)} />

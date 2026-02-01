@@ -9,6 +9,9 @@ const ChildSelection: React.FC = () => {
     queryFn: async () => {
       try {
           const response = await api.get('/children');
+          if (!Array.isArray(response.data)) {
+            throw new Error('Invalid response format');
+          }
           return response.data;
       } catch (err: any) {
           console.error(`Error fetching: ${err.message}`);
@@ -54,7 +57,7 @@ const ChildSelection: React.FC = () => {
           <p className="mb-6 text-gray-600">Select your name to view spending:</p>
 
           <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-            {children?.map((child) => (
+            {Array.isArray(children) && children.map((child) => (
               <Link
                 key={child.id}
                 to={`/child/${child.id}`}

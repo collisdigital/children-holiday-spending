@@ -16,7 +16,7 @@ const ChildDashboard: React.FC = () => {
     queryKey: ['expenses', id],
     queryFn: async () => {
       const response = await api.get(`/children/${id}/expenses`);
-      return response.data;
+      return Array.isArray(response.data) ? response.data : [];
     },
     enabled: !!id,
   });
@@ -33,9 +33,12 @@ const ChildDashboard: React.FC = () => {
   // Get child name (could be optimized by passing state or fetching child details)
   const { data: children } = useQuery({
       queryKey: ['children'],
-      queryFn: async () => (await api.get('/children')).data
+      queryFn: async () => {
+        const response = await api.get('/children');
+        return Array.isArray(response.data) ? response.data : [];
+      }
   });
-  const childName = children?.find((c: any) => c.id === Number(id))?.name || 'Child';
+  const childName = Array.isArray(children) ? children.find((c: any) => c.id === Number(id))?.name || 'Child' : 'Child';
 
   // Toggle Filter Logic
   const toggleFilter = (type: 'cash' | 'card') => {
@@ -46,7 +49,7 @@ const ChildDashboard: React.FC = () => {
   };
 
   const filteredExpenses = useMemo(() => {
-    if (!expenses) return [];
+    if (!Array.isArray(expenses)) return [];
     // If no filters are selected, show all (default behavior)
     // If filters are selected, show only expenses matching the SELECTED filters
     const isAnyFilterActive = filters.cash || filters.card;
