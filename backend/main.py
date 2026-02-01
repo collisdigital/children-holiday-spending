@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import List
 
-from fastapi import Depends, FastAPI, Header, HTTPException, APIRouter
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
