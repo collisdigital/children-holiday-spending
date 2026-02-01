@@ -7,7 +7,21 @@ A full-stack application for tracking and managing holiday spending for children
 - **`/backend`**: FastAPI (Python) application providing a REST API, using SQLAlchemy and Alembic.
 - **`/frontend`**: React (TypeScript) application built with Vite and Tailwind CSS, served by Fastify in production.
 
-## Quick Start
+## Docker Setup (Recommended)
+
+To run the entire application using Docker Compose:
+
+1.  Make sure you have Docker and Docker Compose installed.
+2.  Run the following command from the root directory:
+    ```bash
+    docker-compose up --build
+    ```
+3.  Access the application:
+    - Frontend: `http://localhost:5173`
+    - Backend API: `http://localhost:8000`
+    - API Docs: `http://localhost:8000/docs`
+
+## Manual Quick Start
 
 ### 1. Backend Setup
 ```bash
