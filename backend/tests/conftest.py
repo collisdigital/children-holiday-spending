@@ -67,7 +67,7 @@ async def client(db_session):
     original_lifespan = app.router.lifespan_context
     app.router.lifespan_context = mock_lifespan
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test/api/v1") as c:
         yield c
 
     app.dependency_overrides.clear()
