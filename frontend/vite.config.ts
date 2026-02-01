@@ -12,16 +12,12 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
-        '/children': backendUrl,
-        '/expenses': backendUrl,
-        '/verify-pin': backendUrl,
+        '/api': backendUrl,
       }
     },
     preview: {
       proxy: {
-        '/children': backendUrl,
-        '/expenses': backendUrl,
-        '/verify-pin': backendUrl,
+        '/api': backendUrl,
       }
     }
   }

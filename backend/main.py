@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import List
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,12 +44,14 @@ def verify_admin_pin(x_admin_pin: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid Admin PIN")
     return x_admin_pin
 
-@app.get("/children", response_model=List[schemas.Child])
+router = APIRouter(prefix="/api/v1")
+
+@router.get("/children", response_model=List[schemas.Child])
 async def read_children(db: AsyncSession = Depends(get_db)):
     children = await crud.get_children(db)
     return children
 
-@app.get("/children/{child_id}/expenses", response_model=List[schemas.Expense])
+@router.get("/children/{child_id}/expenses", response_model=List[schemas.Expense])
 async def read_child_expenses(child_id: int, db: AsyncSession = Depends(get_db)):
     child = await crud.get_child(db, child_id)
     if not child:
@@ -57,7 +59,7 @@ async def read_child_expenses(child_id: int, db: AsyncSession = Depends(get_db))
     expenses = await crud.get_expenses_by_child(db, child_id)
     return expenses
 
-@app.get("/children/{child_id}/total", response_model=schemas.ChildSpendSummary)
+@router.get("/children/{child_id}/total", response_model=schemas.ChildSpendSummary)
 async def read_child_total(child_id: int, db: AsyncSession = Depends(get_db)):
     child = await crud.get_child(db, child_id)
     if not child:
@@ -66,28 +68,30 @@ async def read_child_total(child_id: int, db: AsyncSession = Depends(get_db)):
     summary = await crud.get_child_total_expense(db, child_id)
     return summary
 
-@app.post("/expenses", response_model=schemas.Expense, dependencies=[Depends(verify_admin_pin)])
+@router.post("/expenses", response_model=schemas.Expense, dependencies=[Depends(verify_admin_pin)])
 async def create_expense(expense: schemas.ExpenseCreate, db: AsyncSession = Depends(get_db)):
     child = await crud.get_child(db, expense.child_id)
     if not child:
         raise HTTPException(status_code=404, detail="Child not found")
     return await crud.create_expense(db, expense)
 
-@app.put("/expenses/{expense_id}", response_model=schemas.Expense, dependencies=[Depends(verify_admin_pin)])
+@router.put("/expenses/{expense_id}", response_model=schemas.Expense, dependencies=[Depends(verify_admin_pin)])
 async def update_expense(expense_id: int, expense: schemas.ExpenseUpdate, db: AsyncSession = Depends(get_db)):
     db_expense = await crud.update_expense(db, expense_id, expense)
     if not db_expense:
         raise HTTPException(status_code=404, detail="Expense not found")
     return db_expense
 
-@app.delete("/expenses/{expense_id}", dependencies=[Depends(verify_admin_pin)])
+@router.delete("/expenses/{expense_id}", dependencies=[Depends(verify_admin_pin)])
 async def delete_expense(expense_id: int, db: AsyncSession = Depends(get_db)):
     success = await crud.delete_expense(db, expense_id)
     if not success:
         raise HTTPException(status_code=404, detail="Expense not found")
     return {"status": "success", "id": expense_id}
 
-@app.post("/verify-pin")
+@router.post("/verify-pin")
 async def check_pin(x_admin_pin: str = Header(None)):
     verify_admin_pin(x_admin_pin)
     return {"status": "ok"}
+
+app.include_router(router)
